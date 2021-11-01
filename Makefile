@@ -2,7 +2,7 @@ NAME     := ip-calc-practice-api
 VERSION  := v0.0.1
 REVISION := $(shell git rev-parse --short HEAD)
 
-SRCS    := $(shell find server -type f -name '*.go')
+SRCS    := $(shell find . -type f -name '*.go')
 DSTDIR  := /srv/http/bin
 USER    := http
 GROUP   := http
@@ -11,7 +11,12 @@ LDFLAGS := -ldflags="-s -w -X \"main.Version=$(VERSION)\" -X \"main.Revision=$(R
 GOVER     := $(shell go version | awk '{ print substr($$3, 3) }' | tr "." " ")
 VER_JUDGE := $(shell if [ $(word 1,$(GOVER)) -eq 1 ] && [ $(word 2,$(GOVER)) -le 10 ]; then echo 0; else echo 1; fi)
 
-FRONT_DSTDIR := /srv/http/$(NAME)
+DB_USER :=
+BD_PASS :=
+DB_HOST :=
+DB_PORT := 3306
+DB_NAME := ip
+DB_URL  := "mysql://$(DB_USER):$(DB_PASS)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)?tls=false"
 
 run:
 	go run *.go
@@ -27,7 +32,12 @@ build: $(SRCS)
 	@go build -a -tags netgo -installsuffix netgo $(LDFLAGS) -o bin/$(NAME)
 	@command cp -ar $(NAME).sql bin/
 
-#migrate:
+.PHONY: db
+db:
+	@migrate -database $(DB_URL) -path migrations up
+
+db-down:
+	@migrate -database $(DB_URL) -path migrations down
 
 install:
 	@command cp -r bin/$(NAME) $(DSTDIR)/
