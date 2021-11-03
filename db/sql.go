@@ -54,19 +54,24 @@ func GetDataSourceName() (string, string, error) {
 		return "", "", e
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
-	                   conf.DB.User,
-	                   conf.DB.Password,
-	                   conf.DB.Server,
-	                   conf.DB.Port,
-	                   conf.DB.DBName)
+	var dsn string
 
-	if conf.Type == "mysql" && (!conf.DB.TLS.IsDisable) {
-		if err := registerMysqlTLSConfig(conf.DB.TLS); err != nil {
-			return "", "", err
+	switch conf.Type {
+	case "mysql":
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
+	                      conf.DB.User,
+	                      conf.DB.Password,
+	                      conf.DB.Server,
+	                      conf.DB.Port,
+	                      conf.DB.DBName)
+
+		if !conf.DB.TLS.IsDisable {
+			if err := registerMysqlTLSConfig(conf.DB.TLS); err != nil {
+				return "", "", err
+			}
+
+			dsn += "?tls=custom"
 		}
-
-		dsn += "?tls=custom"
 	}
 
 	return conf.Type, dsn, nil
