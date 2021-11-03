@@ -18,8 +18,8 @@ DB_PORT := 3306
 DB_NAME := ip
 DB_URL  := "mysql://$(DB_USER):$(DB_PASS)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)?tls=false"
 
-run:
-	go run *.go
+run: build
+	bin/$(NAME)
 
 init:
 ifeq ($(VER_JUDGE),1)
