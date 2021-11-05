@@ -5,17 +5,17 @@ import (
 )
 
 type MstrID struct {
-	Id    string `db:"id"`
+	Id     string `db:"id"`
 	Total  int    `db:"total"`
 	Expire string `db:"expire"`
 }
 
 type TranQuestion struct {
-	Id       string `db:"id"`
+	Id        string `db:"id"`
 	Number    int    `db:"question_number"`
 	Source    string `db:"source"`
 	CIDRbits  int    `db:"cidr_bits"`
-	IsCIDR    bool   `db:"is_cidr"`
+	IsCIDR    int    `db:"is_cidr"`
 	CorNwAddr string `db:"correct_nw"`
 	AnsNwAddr string `db:"answer_nw"`
 	CorBcAddr string `db:"correct_bc"`
