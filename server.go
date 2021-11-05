@@ -45,10 +45,10 @@ func next(c *gin.Context) {
 	//c.Abort()
 }
 
-// summary => 固有キーを取得します
-// return::string => 一意な固有キー
+// summary => 固有IDを取得します
+// return::string => 一意な固有ID
 /////////////////////////////////////////
-func getKey() string {
+func getID() string {
 	obj, err := uuid.NewRandom()
 
 	if err == nil {

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS `T_QUESTION` (
-  `key` VARCHAR (36) NOT NULL,
+  `id` VARCHAR (36) NOT NULL,
   `question_number` TINYINT UNSIGNED NOT NULL DEFAULT '0',
   `source` VARCHAR (15) NOT NULL DEFAULT '0.0.0.0',
   `cidr_bits` TINYINT UNSIGNED NOT NULL DEFAULT '0',
@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS `T_QUESTION` (
   `correct_bc` VARCHAR (15) NOT NULL DEFAULT '0.0.0.0',
   `answer_bc` VARCHAR (15) NOT NULL DEFAULT '0.0.0.0',
   `elapsed` INT NOT NULL DEFAULT '0',
-  PRIMARY KEY(`key`, `question_number`)
+  PRIMARY KEY(`id`, `question_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

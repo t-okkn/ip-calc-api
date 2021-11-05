@@ -4,14 +4,14 @@ import (
 	"github.com/go-gorp/gorp"
 )
 
-type MstrKey struct {
-	Key    string `db:"key"`
+type MstrID struct {
+	Id    string `db:"id"`
 	Total  int    `db:"total"`
 	Expire string `db:"expire"`
 }
 
 type TranQuestion struct {
-	Key       string `db:"key"`
+	Id       string `db:"id"`
 	Number    int    `db:"question_number"`
 	Source    string `db:"source"`
 	CIDRbits  int    `db:"cidr_bits"`
@@ -25,7 +25,7 @@ type TranQuestion struct {
 
 // MapStructsToTables 構造体と物理テーブルの紐付け
 func MapStructsToTables(dbmap *gorp.DbMap) {
-	dbmap.AddTableWithName(MstrKey{}, "M_KEY")
+	dbmap.AddTableWithName(MstrID{}, "M_ID")
 	dbmap.AddTableWithName(TranQuestion{}, "T_QUESTION")
 }
 

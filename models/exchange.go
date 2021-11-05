@@ -1,7 +1,7 @@
 package models
 
 type QuestionSet struct {
-	Key      string
+	Id      string
 	Number   int
 	Souce    string
 	CIDRbits int
@@ -9,7 +9,7 @@ type QuestionSet struct {
 }
 
 type AnswerSet struct {
-	Key     string
+	Id     string
 	Number  int
 	NwAddr  string
 	BcAddr  string
