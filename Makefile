@@ -19,18 +19,18 @@ DB_NAME := ip
 DB_URL  := "mysql://$(DB_USER):$(DB_PASS)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)?tls=false"
 
 run: build
-	bin/$(NAME)
+	./bin/$(NAME)
 
 init:
 ifeq ($(VER_JUDGE),1)
-	go mod init tidy
+	go mod init $(NAME)
 else
 	echo "Packageの取得は手動で行ってください"
 endif
 
 build: $(SRCS)
 	@go build -a -tags netgo -installsuffix netgo $(LDFLAGS) -o bin/$(NAME)
-	@command cp -ar $(NAME).sql bin/
+	@cp -ar $(NAME).sql bin/
 
 .PHONY: db
 db:
@@ -40,8 +40,8 @@ db-down:
 	@migrate -database $(DB_URL) -path migrations down
 
 install:
-	@command cp -r bin/$(NAME) $(DSTDIR)/
-	@command cp -r bin/$(NAME).sql $(DSTDIR)/
+	@cp -r bin/$(NAME) $(DSTDIR)/
+	@cp -r bin/$(NAME).sql $(DSTDIR)/
 	@chown $(USER):$(GROUP) $(DSTDIR)/$(NAME)
 	@chown -R $(USER):$(GROUP) $(DSTDIR)/$(NAME).sql
 
