@@ -49,9 +49,8 @@ func GetDataSourceName() (string, string, error) {
 	f := filepath.Join(dir, "connect.toml")
 	var conf connectConfig
 
-	if _, err := toml.Decode(f, &conf); err != nil {
-		e := errors.New("コンフィグの内容を取得できませんでした")
-		return "", "", e
+	if _, err := toml.DecodeFile(f, &conf); err != nil {
+		return "", "", err
 	}
 
 	var dsn string
@@ -59,11 +58,11 @@ func GetDataSourceName() (string, string, error) {
 	switch conf.Type {
 	case "mysql":
 		dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
-	                      conf.DB.User,
-	                      conf.DB.Password,
-	                      conf.DB.Server,
-	                      conf.DB.Port,
-	                      conf.DB.DBName)
+		                  conf.DB.User,
+		                  conf.DB.Password,
+		                  conf.DB.Server,
+		                  conf.DB.Port,
+		                  conf.DB.DBName)
 
 		if !conf.DB.TLS.IsDisable {
 			if err := registerMysqlTLSConfig(conf.DB.TLS); err != nil {
