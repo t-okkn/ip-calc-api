@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
-	"database/sql"
 	"errors"
 	"io/ioutil"
 	"fmt"
@@ -132,5 +131,7 @@ func registerMysqlTLSConfig(tlsi tlsInfo) error {
 			Certificates: clientCert,
 		})
 	}
+
+	return nil
 }
 
