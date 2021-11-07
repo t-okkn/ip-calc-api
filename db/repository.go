@@ -7,10 +7,12 @@ import (
 	"github.com/t-okkn/ip-calc-practice-api/models"
 )
 
-type IpRepository gorp.SqlExecutor
+type IpRepository struct {
+	*gorp.DbMap
+}
 
-func NewIpRepository(exec gorp.SqlExecutor) *IpRepository {
-	return &IpRepository(exec)
+func NewIpRepository(dm *gorp.DbMap) *IpRepository {
+	return &IpRepository{dm}
 }
 
 func (r *IpRepository) GetExpire(ctx context.Context, id string) (models.MstrID, error) {
@@ -18,8 +20,8 @@ func (r *IpRepository) GetExpire(ctx context.Context, id string) (models.MstrID,
 	query := GetSQL("get-expire", "")
 	val := map[string]interface{}{"id": id}
 
-	if err := r.exec.SelectOne(&result, query, val); err != nil {
-		return nil, err
+	if err := r.SelectOne(&result, query, val); err != nil {
+		return models.MstrID{}, err
 	}
 
 	return result, nil
@@ -30,8 +32,8 @@ func (r *IpRepository) GetResults(ctx context.Context, id string) ([]models.Tran
 	query := GetSQL("get-result", "")
 	val := map[string]interface{}{"id": id}
 
-	if _, err := r.exec.Select(&result, query, val); err != nil {
-		return nil, err
+	if _, err := r.Select(&result, query, val); err != nil {
+		return []models.TranQuestion{}, err
 	}
 
 	return result, nil
