@@ -1,18 +1,18 @@
 package models
 
 type QuestionSet struct {
-	Id      string
-	Number   int
-	Souce    string
-	CIDRbits int
-	IsCIDR   bool
+	Id       string `json:"id"`
+	Number   int    `json:"number"`
+	Source   string `json:"source"`
+	CIDRbits int    `json:"cidr_bits"`
+	IsCIDR   int    `json:"is_cidr"`
 }
 
 type AnswerSet struct {
-	Id     string
-	Number  int
-	NwAddr  string
-	BcAddr  string
-	Elapsed int
+	Id      string `json:"id"`
+	Number  int    `json:"number"`
+	NwAddr  string `json:"answer_nw"`
+	BcAddr  string `json:"answer_bc"`
+	Elapsed int    `json:"elapsed"`
 }
 
