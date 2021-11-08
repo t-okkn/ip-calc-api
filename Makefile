@@ -11,11 +11,12 @@ LDFLAGS := -ldflags="-s -w -X \"main.Version=$(VERSION)\" -X \"main.Revision=$(R
 GOVER     := $(shell go version | awk '{ print substr($$3, 3) }' | tr "." " ")
 VER_JUDGE := $(shell if [ $(word 1,$(GOVER)) -eq 1 ] && [ $(word 2,$(GOVER)) -le 10 ]; then echo 0; else echo 1; fi)
 
-DB_USER :=
-BD_PASS :=
-DB_HOST :=
-DB_PORT := 3306
-DB_NAME := ip
+DB_CONFIG := $(NAME).sql/connect.toml
+DB_USER := $(shell cat $(DB_CONFIG) | grep user | sed -e 's/user = //' -e 's/"//g')
+BD_PASS := $(shell cat $(DB_CONFIG) | grep password | sed -e 's/password = //' -e 's/"//g')
+DB_HOST := $(shell cat $(DB_CONFIG) | grep server | sed -e 's/server = //' -e 's/"//g')
+DB_PORT := $(shell cat $(DB_CONFIG) | grep port | sed -e 's/port = //')
+DB_NAME := $(shell cat $(DB_CONFIG) | grep name | sed -e 's/name = \(.*\) \#.*/\1/' -e 's/"//g')
 DB_URL  := "mysql://$(DB_USER):$(DB_PASS)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)?tls=false"
 
 run: build
