@@ -10,8 +10,6 @@ type QuestionSet struct {
 }
 
 type AnswerSet struct {
-	Id         string `form:"id"`
-	Number     string `form:"number"`
 	NwAddr1st  string `form:"nwaddr_1st"`
 	NwAddr2nd  string `form:"nwaddr_2nd"`
 	NwAddr3rd  string `form:"nwaddr_3rd"`
