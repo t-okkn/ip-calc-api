@@ -15,7 +15,7 @@ var BitsList = [27]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                        18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ,29, 30}
 
 
-func getSourceIP() uint32 {
+func getQuestion() (uint32, int) {
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 
@@ -31,42 +31,36 @@ func getSourceIP() uint32 {
 		ipint -= 268435457
 	}
 
-	return ipint
-}
-
-func getCIDRBits(ip *uint32) int {
-	src := rand.NewSource(time.Now().UnixNano())
-	rnd := rand.New(src)
-
-	var bits int
+	var start int
 
 	switch {
-		case *ip >= 167772160 && *ip <= 184549375:
+		case ipint >= 167772160 && ipint <= 184549375:
 			// 10.0.0.0–10.255.255.255 -> /8 に制限
-			bits = BitsList[4:][rnd.Intn(23)]
+			start = 4
 
-		case *ip >= 2130706432 && *ip <= 2147483647:
+		case ipint >= 2130706432 && ipint <= 2147483647:
 			// 127.0.0.0–127.255.255.255 -> /8 に制限
-			bits = BitsList[4:][rnd.Intn(23)]
+			start = 4
 
-		case *ip >= 2851995648 && *ip <= 2852061183:
+		case ipint >= 2851995648 && ipint <= 2852061183:
 			// 169.254.0.0–169.254.255.255 -> /16 に制限
-			bits = BitsList[12:][rnd.Intn(15)]
+			start = 12
 
-		case *ip >= 2886729728 && *ip <= 2887778303:
+		case ipint >= 2886729728 && ipint <= 2887778303:
 			// 172.16.0.0–172.31.255.255 -> /12 に制限
-			bits = BitsList[8:][rnd.Intn(19)]
+			start = 8
 
-		case *ip >= 3232235520 && *ip <= 3232301055:
+		case ipint >= 3232235520 && ipint <= 3232301055:
 			// 192.168.0.0–192.168.255.255 -> /16 に制限
-			bits = BitsList[12:][rnd.Intn(15)]
+			start = 12
 
 		default:
-			start := rnd.Intn(21)
-			bits = BitsList[start:][rnd.Intn(27-start)]
+			start = rnd.Intn(21)
 	}
 
-	return bits
+	bits := BitsList[start:][rnd.Intn(27-start)]
+
+	return ipint, bits
 }
 
 func ip2uint(ip net.IP) uint32 {
@@ -88,20 +82,10 @@ func getBroadcastAddress(ip net.IP, bits int) net.IP {
 	i := []byte(ip.To4())
 	m := []byte(getCIDRMask(bits))
 
-	r := []byte{i[0] | (m[0] ^ 255),
-	            i[1] | (m[1] ^ 255),
-	            i[2] | (m[2] ^ 255),
-	            i[3] | (m[3] ^ 255)}
-
-	return net.IP(r)
-}
-
-func getCIDRMask(bits int) net.IPMask {
-	if bits >= 0 && bits <= 32 {
-		return net.CIDRMask(bits, V4BITS)
-	} else {
-		return net.IPv4Mask(0, 0, 0, 0)
-	}
+	return net.IPv4(i[0] | (m[0] ^ 255),
+	                i[1] | (m[1] ^ 255),
+	                i[2] | (m[2] ^ 255),
+	                i[3] | (m[3] ^ 255))
 }
 
 func getSubnetMask(bits int) string {
@@ -113,5 +97,13 @@ func getSubnetMask(bits int) string {
 	}
 
 	return fmt.Sprintf("%d.%d.%d.%d", s[0], s[1], s[2], s[3])
+}
+
+func getCIDRMask(bits int) net.IPMask {
+	if bits >= 0 && bits <= 32 {
+		return net.CIDRMask(bits, V4BITS)
+	} else {
+		return net.IPv4Mask(0, 0, 0, 0)
+	}
 }
 

@@ -34,8 +34,8 @@ func SetupRouter() *gin.Engine {
 	v1 := router.Group("api/v1")
 
 	v1.GET("/init/:total", initializeAction)
-	//v1.GET("/key/:key", resumeAnswer)
-	//v1.POST("/key/:key", getNextQuestion)
+	//v1.GET("/resume/:key", resumeAnswer)
+	v1.POST("/next/:key", getNextQuestion)
 	//v1.DELETE("clean", deleteExpiredData)
 
 	dbmap = initDB()
@@ -55,14 +55,13 @@ func initializeAction(c *gin.Context) {
 		c.SetCookie(COOKIE_NAME, "", -1, "/", "", true, true)
 	}
 
-	id    := getID()
-	ipint := getSourceIP()
-	bits  := getCIDRBits(&ipint)
-	ip    := uint2ip(ipint)
+	ipint, bits := getQuestion()
+	id := getID()
+	ip := uint2ip(ipint)
 
 	mid := models.MstrID{
 		Id:     id,
-		Total:  *total,
+		Total:  total,
 		Expire: time.Now().Format(DATETIME_FORMAT),
 	}
 
@@ -150,15 +149,13 @@ func resumeAnswer(c *gin.Context) {
 		return
 	}
 }
+*/
 
-// summary => 解答をDBへ格納して、次の問題を返す処理
+// summary => 解答をDBへ格納して、次の問題 or 結果を返す処理
 // param::c => [p] gin.Context構造体
 /////////////////////////////////////////
 func getNextQuestion(c *gin.Context) {
-	//途中で処理を中断
-	//c.Abort()
 }
-*/
 
 func initDB() *gorp.DbMap {
 	driver, dsn, err := db.GetDataSourceName()
@@ -198,13 +195,12 @@ func getID() string {
 // param::totalStr => Paramからの流入値
 // return::*int => 出題数
 /////////////////////////////////////////
-func getTotalValue(totalStr string) *int {
+func getTotalValue(totalStr string) int {
 	total, err := strconv.Atoi(totalStr)
 
 	// 変換に失敗 OR :totalのパラメータが存在しない場合、10問
 	if err != nil {
-		total = 10
-		return &total
+		return 10
 	}
 
 	if total < 1 {
@@ -216,7 +212,7 @@ func getTotalValue(totalStr string) *int {
 		total = LIMIT_TOTAL
 	}
 
-	return &total
+	return total
 }
 
 func getParsedTime(strTime string) time.Time {
@@ -229,3 +225,4 @@ func getParsedTime(strTime string) time.Time {
 
 	return t
 }
+
