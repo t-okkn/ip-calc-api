@@ -3,11 +3,11 @@ SELECT
   `question_number`,
   `source`,
   `cidr_bits`,
-  CAST(`is_cidr` AS UNSIGNED) AS is_cidr,
+  CAST(`is_cidr` AS UNSIGNED) AS `is_cidr`,
   `correct_nw`,
   `answer_nw`,
   `correct_bc`,
   `answer_bc`,
   `elapsed`
 FROM T_QUESTION
-WHERE id = :id;
+WHERE `id` = :id;
