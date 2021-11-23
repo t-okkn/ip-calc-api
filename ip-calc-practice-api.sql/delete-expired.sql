@@ -10,11 +10,4 @@ SELECT
   `answer_bc`,
   `elapsed`
 FROM T_QUESTION
-WHERE `id`
-  IN (""
-  {{ range .IDs }}
-    , ?
-  {{ else }}
-
-  {{ end }}
-);
+WHERE `id` IN (:ids);

@@ -140,21 +140,21 @@ func (r *IpRepository) UpdateQuestion(tq models.TranQuestion) error {
 }
 
 func (r *IpRepository) DeleteExpiredData(ids []models.MstrID) error {
-	val := make([]interface{}, len(ids), len(ids))
+	str_ids := make([]string, len(ids), len(ids))
 	for i, v := range ids {
-		val[i] = v.Id
+		str_ids[i] = v.Id
 	}
 
-	req := struct{ IDs []interface{} }{ val }
-	query := GetSQL("delete-expired", req)
-
 	var result []models.TranQuestion
-	if _, err := r.Select(&result, query, val...); err != nil {
+	query := GetSQL("delete-expired", "")
+	val := map[string]interface{}{"ids": str_ids}
+
+	if _, err := r.Select(&result, query, val); err != nil {
 		return err
 	}
 
 	if result == nil || len(result) == 0 {
-		e := errors.New("No Targets")
+		e := errors.New("No expired data in T_QUESTION")
 		return e
 	}
 
