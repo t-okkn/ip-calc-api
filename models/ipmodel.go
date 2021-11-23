@@ -23,6 +23,11 @@ type TranQuestion struct {
 	Elapsed   int    `db:"elapsed" json:"elapsed"`
 }
 
+type NowNumber struct {
+	Now   int `db:"now"`
+	Total int `db:"total"`
+}
+
 // MapStructsToTables 構造体と物理テーブルの紐付け
 func MapStructsToTables(dbmap *gorp.DbMap) {
 	dbmap.AddTableWithName(MstrID{}, "M_ID").SetKeys(false, "Id")

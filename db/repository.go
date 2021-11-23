@@ -62,6 +62,18 @@ func (r *IpRepository) GetResults(id string) ([]models.TranQuestion, error) {
 	return result, nil
 }
 
+func (r *IpRepository) CheckNow(id string) (models.NowNumber, error) {
+	var result models.NowNumber
+	query := GetSQL("check-now", "")
+	val := map[string]interface{}{"id": id}
+
+	if err := r.SelectOne(&result, query, val); err != nil {
+		return models.NowNumber{}, err
+	}
+
+	return result, nil
+}
+
 func (r *IpRepository) InsertFirstData(mid models.MstrID, tq models.TranQuestion) error {
 	tx, err := r.Begin()
 
