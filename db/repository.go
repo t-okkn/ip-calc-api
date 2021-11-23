@@ -99,6 +99,26 @@ func (r *IpRepository) InsertFirstData(mid models.MstrID, tq models.TranQuestion
 	return nil
 }
 
+func (r *IpRepository) InsertQuestion(tq models.TranQuestion) error {
+	tx, err := r.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Insert(&tq); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
+
 func (r *IpRepository) UpdateQuestion(tq models.TranQuestion) error {
 	tx, err := r.Begin()
 
