@@ -139,6 +139,26 @@ func (r *IpRepository) UpdateQuestion(tq models.TranQuestion) error {
 	return nil
 }
 
+func (r *IpRepository) UpdateID(tid models.TranID) error {
+	tx, err := r.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.Update(&tid); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
+
 func (r *IpRepository) DeleteExpiredData(ids []models.TranID) error {
 	str_ids := make([]string, len(ids), len(ids))
 	for i, v := range ids {
