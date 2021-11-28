@@ -8,7 +8,9 @@ SELECT
   `answer_nw`,
   `correct_bc`,
   `answer_bc`,
-  `elapsed`
+  `elapsed`,
+  `created`,
+  `updated`
 FROM T_QUESTION
 WHERE `id` = :id
   AND `question_number` = :number;

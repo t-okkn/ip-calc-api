@@ -21,6 +21,8 @@ type TranQuestion struct {
 	CorBcAddr string `db:"correct_bc" json:"correct_bc"`
 	AnsBcAddr string `db:"answer_bc" json:"answer_bc"`
 	Elapsed   int    `db:"elapsed" json:"elapsed"`
+	Created   string `db:"created" json:"created"`
+	Updated   string `db:"updated" json:"updated"`
 }
 
 type NowNumber struct {

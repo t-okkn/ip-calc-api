@@ -96,7 +96,7 @@ func getNextQuestion(c *gin.Context) {
 		return
 	}
 
-	now, err := repo.CheckNow(id_prm)
+	check_qnum, err := repo.CheckNow(id_prm)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, errFailedGetData)
@@ -104,7 +104,7 @@ func getNextQuestion(c *gin.Context) {
 		return
 	}
 
-	if number != now.Now {
+	if number != check_qnum.Now {
 		c.JSON(http.StatusBadRequest, errInvalidRequestedData)
 		c.Abort()
 		return
@@ -135,6 +135,7 @@ func getNextQuestion(c *gin.Context) {
 	tq.AnsNwAddr = nwaddr
 	tq.AnsBcAddr = bcaddr
 	tq.Elapsed   = elapsed
+	tq.Updated   = getNowString()
 
 	if err := repo.UpdateQuestion(tq); err != nil {
 		c.JSON(http.StatusServiceUnavailable, errFailedOperateData)
@@ -142,8 +143,8 @@ func getNextQuestion(c *gin.Context) {
 		return
 	}
 
-	if number < now.Total {
-		newq := generateNewQuestion(id_prm, now.Now + 1)
+	if number < check_qnum.Total {
+		newq := generateNewQuestion(id_prm, check_qnum.Now + 1)
 
 		if err := repo.InsertQuestion(newq); err != nil {
 			c.JSON(http.StatusServiceUnavailable, errFailedOperateData)
@@ -256,19 +257,22 @@ func getTotalValue(totalStr string) int {
 /////////////////////////////////////////
 func generateNewQuestion(id string, num int) models.TranQuestion {
 	ipint, bits := getQuestion()
-	ip := uint2ip(ipint)
+	ip  := uint2ip(ipint)
+	now := getNowString()
 
 	return models.TranQuestion{
-		Id:        id,
-		Number:    num,
-		Source:    ip.String(),
-		CIDRbits:  bits,
-		IsCIDR:    int(ipint % 2),
+		Id       : id,
+		Number   : num,
+		Source   : ip.String(),
+		CIDRbits : bits,
+		IsCIDR   : int(ipint % 2),
 		CorNwAddr: getNetworkAddress(ip, bits).String(),
 		AnsNwAddr: "0.0.0.0",
 		CorBcAddr: getBroadcastAddress(ip, bits).String(),
 		AnsBcAddr: "0.0.0.0",
-		Elapsed:   0,
+		Elapsed  : 0,
+		Created  : now,
+		Updated  : now,
 	}
 }
 
@@ -276,10 +280,10 @@ func generateNewQuestion(id string, num int) models.TranQuestion {
 /////////////////////////////////////////
 func getQuestionSet(tq models.TranQuestion) models.QuestionSet {
 	qs := models.QuestionSet{
-		Id:         tq.Id,
-		Number:     tq.Number,
-		Source:     tq.Source,
-		CIDRbits:   tq.CIDRbits,
+		Id        : tq.Id,
+		Number    : tq.Number,
+		Source    : tq.Source,
+		CIDRbits  : tq.CIDRbits,
 		SubnetMask: "",
 	}
 
@@ -303,14 +307,14 @@ func getResultCollection(tqList []models.TranQuestion) models.ResultCollection {
 
 	for i, tq := range tqList {
 		rs := models.ResultSet{
-			Number:      tq.Number,
-			Source:      tq.Source,
-			CIDRbits:    tq.CIDRbits,
-			SubnetMask:  "",
-			CorNwAddr:   tq.CorNwAddr,
-			AnsNwAddr:   tq.AnsNwAddr,
-			CorBcAddr:   tq.CorBcAddr,
-			AnsBcAddr:   tq.AnsBcAddr,
+			Number     : tq.Number,
+			Source     : tq.Source,
+			CIDRbits   : tq.CIDRbits,
+			SubnetMask : "",
+			CorNwAddr  : tq.CorNwAddr,
+			AnsNwAddr  : tq.AnsNwAddr,
+			CorBcAddr  : tq.CorBcAddr,
+			AnsBcAddr  : tq.AnsBcAddr,
 			AnswerdTime: 0,
 		}
 
@@ -346,6 +350,12 @@ func getParsedTime(strTime string) time.Time {
 	}
 
 	return t
+}
+
+// summary => 現在時刻を示す文字列を取得します
+/////////////////////////////////////////
+func getNowString() string {
+	return time.Now().Format(DATETIME_FORMAT)
 }
 
 // summary => 渡された各オクテットごとの数字をIPアドレスへと結合します
