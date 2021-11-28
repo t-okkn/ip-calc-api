@@ -25,6 +25,20 @@ type ResultSet struct {
 	Source      string `json:"source"`
 	CIDRbits    int    `json:"cidr_bits"`
 	SubnetMask  string `json:"subnet_mask"`
+	AnsNwAddr   string `json:"answer_nw"`
+	AnsBcAddr   string `json:"answer_bc"`
+}
+
+type ResultCollection struct {
+	Id     string      `json:"id"`
+	Result []ResultSet `json:"result"`
+}
+
+type SummarySet struct {
+	Number      int    `json:"number"`
+	Source      string `json:"source"`
+	CIDRbits    int    `json:"cidr_bits"`
+	SubnetMask  string `json:"subnet_mask"`
 	CorNwAddr   string `json:"correct_nw"`
 	AnsNwAddr   string `json:"answer_nw"`
 	CorBcAddr   string `json:"correct_bc"`
@@ -32,8 +46,8 @@ type ResultSet struct {
 	AnswerdTime int    `json:"answered_sec"`
 }
 
-type ResultCollection struct {
+type SummaryCollection struct {
 	Id     string      `json:"id"`
 	IsEnd  bool        `json:"is_end"`
-	Result []ResultSet `json:"result"`
+	Summary []SummarySet `json:"summary"`
 }

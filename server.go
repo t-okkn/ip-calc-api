@@ -158,7 +158,7 @@ func getNextQuestion(c *gin.Context) {
 			return
 		}
 
-		rc := getResultCollection(results)
+		rc := getSummaryCollection(results)
 		rc.IsEnd = true
 
 		c.JSON(http.StatusOK, rc)
@@ -292,7 +292,7 @@ func getRegisteredQuestion(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, getOneResult(tq))
+		c.JSON(http.StatusOK, getOneSummary(tq))
 
 	} else {
 		results, err := repo.GetResults(id_prm)
@@ -303,7 +303,7 @@ func getRegisteredQuestion(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, getResultCollection(results))
+		c.JSON(http.StatusOK, getSummaryCollection(results))
 	}
 }
 
@@ -449,8 +449,8 @@ func getQuestionSet(tq models.TranQuestion) models.QuestionSet {
 
 // summary => JSONとして返却するための構造体へデータを詰め替えます
 /////////////////////////////////////////
-func getOneResult(tq models.TranQuestion) models.ResultCollection {
-	rs := models.ResultSet{
+func getOneSummary(tq models.TranQuestion) models.SummaryCollection {
+	ss := models.SummarySet{
 		Number     : tq.Number,
 		Source     : tq.Source,
 		CIDRbits   : tq.CIDRbits,
@@ -463,8 +463,8 @@ func getOneResult(tq models.TranQuestion) models.ResultCollection {
 	}
 
 	if tq.IsCIDR == 1 {
-		rs.CIDRbits   = -1
-		rs.SubnetMask = getSubnetMask(tq.CIDRbits)
+		ss.CIDRbits   = -1
+		ss.SubnetMask = getSubnetMask(tq.CIDRbits)
 	}
 
 	if tq.Number > 1 {
@@ -475,32 +475,32 @@ func getOneResult(tq models.TranQuestion) models.ResultCollection {
 				forward_elapsed = q.Elapsed
 			}
 
-			rs.AnswerdTime = tq.Elapsed - forward_elapsed
+			ss.AnswerdTime = tq.Elapsed - forward_elapsed
 		}
 
 	} else if tq.Number == 1 {
-		rs.AnswerdTime = tq.Elapsed
+		ss.AnswerdTime = tq.Elapsed
 	}
 
-	return models.ResultCollection{
+	return models.SummaryCollection{
 		Id:     tq.Id,
 		IsEnd:  false,
-		Result: []models.ResultSet{rs},
+		Summary: []models.SummarySet{ss},
 	}
 }
 
 // summary => JSONとして返却するための構造体へデータを詰め替えます
 /////////////////////////////////////////
-func getResultCollection(tqList []models.TranQuestion) models.ResultCollection {
-	r   := make([]models.ResultSet, len(tqList))
-	res := models.ResultCollection{
+func getSummaryCollection(tqList []models.TranQuestion) models.SummaryCollection {
+	s   := make([]models.SummarySet, len(tqList))
+	res := models.SummaryCollection{
 		Id:     "",
 		IsEnd:  false,
-		Result: r,
+		Summary: s,
 	}
 
 	for i, tq := range tqList {
-		rs := models.ResultSet{
+		ss := models.SummarySet{
 			Number     : tq.Number,
 			Source     : tq.Source,
 			CIDRbits   : tq.CIDRbits,
@@ -513,21 +513,21 @@ func getResultCollection(tqList []models.TranQuestion) models.ResultCollection {
 		}
 
 		if tq.IsCIDR == 1 {
-			rs.CIDRbits   = -1
-			rs.SubnetMask = getSubnetMask(tq.CIDRbits)
+			ss.CIDRbits   = -1
+			ss.SubnetMask = getSubnetMask(tq.CIDRbits)
 		}
 
 		if i == 0 {
 			res.Id = tq.Id
-			rs.AnswerdTime = tq.Elapsed
+			ss.AnswerdTime = tq.Elapsed
 
 		} else {
 			if tq.Elapsed != 0 {
-				rs.AnswerdTime = tq.Elapsed - tqList[i-1].Elapsed
+				ss.AnswerdTime = tq.Elapsed - tqList[i-1].Elapsed
 			}
 		}
 
-		res.Result[i] = rs
+		res.Summary[i] = ss
 	}
 
 	return res
