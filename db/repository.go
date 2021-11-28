@@ -160,7 +160,7 @@ func (r *IpRepository) UpdateID(tid models.TranID) error {
 }
 
 func (r *IpRepository) DeleteExpiredData(ids []models.TranID) error {
-	str_ids := make([]string, len(ids), len(ids))
+	str_ids := make([]string, len(ids))
 	for i, v := range ids {
 		str_ids[i] = v.Id
 	}
@@ -169,19 +169,25 @@ func (r *IpRepository) DeleteExpiredData(ids []models.TranID) error {
 	query := GetSQL("delete-expired", "")
 	val := map[string]interface{}{"ids": str_ids}
 
-	if _, err := r.Select(&result, query, val); err != nil {
-		return err
-	}
-
-	if result == nil || len(result) == 0 {
-		e := errors.New("No expired data in T_QUESTION")
-		return e
-	}
-
 	tx, err := r.Begin()
 
 	if err != nil {
 		return err
+	}
+
+	if _, err := r.Select(&result, query, val); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if result == nil || len(result) == 0 {
+		if err := tx.Commit(); err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		e := errors.New("No expired data in T_QUESTION")
+		return e
 	}
 
 	errs := make([]error, 0, 2 * len(ids))
@@ -200,7 +206,6 @@ func (r *IpRepository) DeleteExpiredData(ids []models.TranID) error {
 
 	if len(errs) > 0 {
 		tx.Rollback()
-
 		return errs[0]
 	}
 

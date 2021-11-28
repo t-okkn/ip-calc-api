@@ -12,4 +12,5 @@ SELECT
   `created`,
   `updated`
 FROM T_QUESTION
-WHERE `id` IN (:ids);
+WHERE `id` IN (:ids)
+FOR UPDATE;
