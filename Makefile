@@ -13,7 +13,7 @@ VER_JUDGE := $(shell if [ $(word 1,$(GOVER)) -eq 1 ] && [ $(word 2,$(GOVER)) -le
 
 DB_CONFIG := $(NAME).sql/connect.toml
 DB_USER := $(shell cat $(DB_CONFIG) | grep user | sed -e 's/user = //' -e 's/"//g')
-BD_PASS := $(shell cat $(DB_CONFIG) | grep password | sed -e 's/password = //' -e 's/"//g')
+DB_PASS := $(shell cat $(DB_CONFIG) | grep password | sed -e 's/password = //' -e 's/"//g')
 DB_HOST := $(shell cat $(DB_CONFIG) | grep server | sed -e 's/server = //' -e 's/"//g')
 DB_PORT := $(shell cat $(DB_CONFIG) | grep port | sed -e 's/port = //')
 DB_NAME := $(shell cat $(DB_CONFIG) | grep name | sed -e 's/name = \(.*\) \#.*/\1/' -e 's/"//g')
