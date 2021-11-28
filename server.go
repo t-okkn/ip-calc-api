@@ -223,6 +223,20 @@ func updateQuestion(c *gin.Context) {
 		return
 	}
 
+	tid, err := repo.GetID(id_prm)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errFailedGetData)
+		c.Abort()
+		return
+	}
+
+	if tid.IsEnd == 1 {
+		c.JSON(http.StatusNotAcceptable, errTheQuestionIsTerminated)
+		c.Abort()
+		return
+	}
+
 	check_qnum, err := repo.CheckNow(id_prm)
 
 	if err != nil {

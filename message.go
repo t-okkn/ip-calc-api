@@ -45,4 +45,9 @@ var (
 		Code   : "E120",
 		Message: "リクエストされた問題番号はまだ存在していません",
 	}
+
+	errTheQuestionIsTerminated = ErrorMessage{
+		Code   : "E121",
+		Message: "既に回答済みの問題を更新することはできません",
+	}
 )
