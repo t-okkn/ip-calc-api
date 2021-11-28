@@ -36,10 +36,10 @@ func SetupRouter() *gin.Engine {
 	v1.GET("/init/:total", initializeAction)
 	v1.POST("/next/:id/:number", getNextQuestion)
 	v1.GET("/resume/:id", resumeAnswer)
-	//v1.DELETE("clean", deleteExpiredData)
 	v1.PUT("/:id/:number", updateQuestion)
 	v1.GET("/:id", getRegisteredQuestion)
 	v1.GET("/:id/:number", getRegisteredQuestion)
+	v1.DELETE("clean", deleteExpiredData)
 
 	repo = initDB()
 
@@ -247,18 +247,6 @@ func resumeAnswer(c *gin.Context) {
 	c.JSON(http.StatusOK, getResumeSet(tq))
 }
 
-/*
-func deleteExpiredData(c *gin.Context) {
-	expiered, err := repo.GetExpired()
-
-	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, errFailedGetData)
-		c.Abort()
-		return
-	}
-}
-*/
-
 // summary => DBの解答情報を更新する処理
 // param::c => [p] gin.Context構造体
 /////////////////////////////////////////
@@ -419,6 +407,34 @@ func getRegisteredQuestion(c *gin.Context) {
 		}
 	}
 }
+
+// summary => DBに登録されている期限切れデータを削除する処理
+// param::c => [p] gin.Context構造体
+/////////////////////////////////////////
+func deleteExpiredData(c *gin.Context) {
+	if repo == nil {
+		c.JSON(http.StatusServiceUnavailable, errCannotConnectDB)
+		c.Abort()
+		return
+	}
+
+	expiered, err := repo.GetExpired()
+
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errFailedGetData)
+		c.Abort()
+		return
+	}
+
+	if err := repo.DeleteExpiredData(expiered); err != nil {
+		c.JSON(http.StatusServiceUnavailable, errFailedOperateData)
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, sucDeleteDone)
+}
+
 
 // summary => DBとの接続についての初期処理
 // return::*db.IpRepository => 構造体

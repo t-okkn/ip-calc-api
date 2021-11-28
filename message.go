@@ -16,6 +16,11 @@ var (
 		Message: "更新に成功しました",
 	}
 
+	sucDeleteDone = SuccessMessage {
+		Code   : "S002",
+		Message: "期限切れデータの削除に成功しました",
+	}
+
 	errCannotConnectDB = ErrorMessage{
 		Code   : "E001",
 		Message: "DBと接続できません",
