@@ -1,11 +1,21 @@
 package main
 
+type SuccessMessage struct {
+	Code    string `json:"success"`
+	Message string `json:"message"`
+}
+
 type ErrorMessage struct {
 	Code    string `json:"error"`
 	Message string `json:"message"`
 }
 
 var (
+	sucUpdateDone = SuccessMessage {
+		Code   : "S001",
+		Message: "更新に成功しました",
+	}
+
 	errCannotConnectDB = ErrorMessage{
 		Code   : "E001",
 		Message: "DBと接続できません",
@@ -29,5 +39,10 @@ var (
 	errInvalidRequestedData = ErrorMessage{
 		Code   : "E101",
 		Message: "リクエストされたデータが不正です",
+	}
+
+	errTheQuestionIsNotExist = ErrorMessage{
+		Code   : "E120",
+		Message: "リクエストされた問題番号はまだ存在していません",
 	}
 )

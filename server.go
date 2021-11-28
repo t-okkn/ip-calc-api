@@ -37,6 +37,9 @@ func SetupRouter() *gin.Engine {
 	v1.POST("/next/:id/:number", getNextQuestion)
 	//v1.GET("/resume/:id", resumeAnswer)
 	//v1.DELETE("clean", deleteExpiredData)
+	v1.PUT("/:id/:number", updateQuestion)
+	v1.GET("/:id", getRegisteredQuestion)
+	v1.GET("/:id/:number", getRegisteredQuestion)
 
 	repo = initDB()
 
@@ -126,16 +129,7 @@ func getNextQuestion(c *gin.Context) {
 		return
 	}
 
-	nwaddr := concatIPAddress(req.NwAddr1st, req.NwAddr2nd,
-		                      req.NwAddr3rd, req.NwAddr4th)
-	bcaddr := concatIPAddress(req.BcAddr1st, req.BcAddr2nd,
-		                      req.BcAddr3rd, req.BcAddr4th)
-	elapsed, _ := strconv.Atoi(req.Elapsed)
-
-	tq.AnsNwAddr = nwaddr
-	tq.AnsBcAddr = bcaddr
-	tq.Elapsed   = elapsed
-	tq.Updated   = getNowString()
+	readyForUpdateQuestion(req, &tq)
 
 	if err := repo.UpdateQuestion(tq); err != nil {
 		c.JSON(http.StatusServiceUnavailable, errFailedOperateData)
@@ -191,6 +185,126 @@ func resumeAnswer(c *gin.Context) {
 func deleteExpiredData(c *gin.Context) {
 }
 */
+
+// summary => DBの解答情報を更新する処理
+// param::c => [p] gin.Context構造体
+/////////////////////////////////////////
+func updateQuestion(c *gin.Context) {
+	id_prm  := c.Param("id")
+	num_prm := c.Param("number")
+
+	number, err := strconv.Atoi(num_prm)
+	if err != nil || (number < 1 || number > LIMIT_TOTAL) {
+		c.JSON(http.StatusBadRequest, errInvalidRequestedURL)
+		c.Abort()
+		return
+	}
+
+	if repo == nil {
+		c.JSON(http.StatusServiceUnavailable, errCannotConnectDB)
+		c.Abort()
+		return
+	}
+
+	check_qnum, err := repo.CheckNow(id_prm)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errFailedGetData)
+		c.Abort()
+		return
+	}
+
+	if number > check_qnum.Now {
+		c.JSON(http.StatusBadRequest, errTheQuestionIsNotExist)
+		c.Abort()
+		return
+	}
+
+	tq, err := repo.GetQuestion(id_prm, number)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errFailedGetData)
+		c.Abort()
+		return
+	}
+
+	var req models.AnswerSet
+
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, errInvalidRequestedData)
+		c.Abort()
+		return
+	}
+
+	readyForUpdateQuestion(req, &tq)
+
+	if err := repo.UpdateQuestion(tq); err != nil {
+		c.JSON(http.StatusServiceUnavailable, errFailedOperateData)
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, sucUpdateDone)
+}
+
+// summary => DBに登録されている問題情報を取得する処理
+// param::c => [p] gin.Context構造体
+/////////////////////////////////////////
+func getRegisteredQuestion(c *gin.Context) {
+	id_prm  := c.Param("id")
+	num_prm := c.Param("number")
+
+	if repo == nil {
+		c.JSON(http.StatusServiceUnavailable, errCannotConnectDB)
+		c.Abort()
+		return
+	}
+
+	if num_prm != "" {
+		number, err := strconv.Atoi(num_prm)
+
+		if err != nil || (number < 1 || number > LIMIT_TOTAL) {
+			c.JSON(http.StatusBadRequest, errInvalidRequestedURL)
+			c.Abort()
+			return
+		}
+
+		check_qnum, err := repo.CheckNow(id_prm)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, errFailedGetData)
+			c.Abort()
+			return
+		}
+
+		if number > check_qnum.Now {
+			c.JSON(http.StatusBadRequest, errTheQuestionIsNotExist)
+			c.Abort()
+			return
+		}
+
+		tq, err := repo.GetQuestion(id_prm, number)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, errFailedGetData)
+			c.Abort()
+			return
+		}
+
+		c.JSON(http.StatusOK, getOneResult(tq))
+
+	} else {
+		results, err := repo.GetResults(id_prm)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, errFailedGetData)
+			c.Abort()
+			return
+		}
+
+		c.JSON(http.StatusOK, getResultCollection(results))
+	}
+}
 
 // summary => DBとの接続についての初期処理
 // return::*db.IpRepository => 構造体
@@ -253,6 +367,43 @@ func getTotalValue(totalStr string) int {
 	return total
 }
 
+func readyForUpdateQuestion(as models.AnswerSet, tq *models.TranQuestion) {
+	str_nwaddr := fmt.Sprintf("%s.%s.%s.%s",
+	                          as.NwAddr1st,
+	                          as.NwAddr2nd,
+	                          as.NwAddr3rd,
+	                          as.NwAddr4th)
+	str_bcaddr := fmt.Sprintf("%s.%s.%s.%s",
+	                          as.BcAddr1st,
+	                          as.BcAddr2nd,
+	                          as.BcAddr3rd,
+	                          as.BcAddr4th)
+
+	nw := net.ParseIP(str_nwaddr)
+	bc := net.ParseIP(str_bcaddr)
+
+	var nwaddr string
+	if nw == nil {
+		nwaddr = "0.0.0.0"
+	} else {
+		nwaddr = str_nwaddr
+	}
+
+	var bcaddr string
+	if bc == nil {
+		bcaddr = "0.0.0.0"
+	} else {
+		bcaddr = str_bcaddr
+	}
+
+	elapsed, _ := strconv.Atoi(as.Elapsed)
+
+	tq.AnsNwAddr = nwaddr
+	tq.AnsBcAddr = bcaddr
+	tq.Elapsed   = elapsed
+	tq.Updated   = getNowString()
+}
+
 // summary => 新しい問題を生成し、その構造体を返します
 /////////////////////////////////////////
 func generateNewQuestion(id string, num int) models.TranQuestion {
@@ -293,6 +444,48 @@ func getQuestionSet(tq models.TranQuestion) models.QuestionSet {
 	}
 
 	return qs
+}
+
+// summary => JSONとして返却するための構造体へデータを詰め替えます
+/////////////////////////////////////////
+func getOneResult(tq models.TranQuestion) models.ResultCollection {
+	rs := models.ResultSet{
+		Number     : tq.Number,
+		Source     : tq.Source,
+		CIDRbits   : tq.CIDRbits,
+		SubnetMask : "",
+		CorNwAddr  : tq.CorNwAddr,
+		AnsNwAddr  : tq.AnsNwAddr,
+		CorBcAddr  : tq.CorBcAddr,
+		AnsBcAddr  : tq.AnsBcAddr,
+		AnswerdTime: 0,
+	}
+
+	if tq.IsCIDR == 1 {
+		rs.CIDRbits   = -1
+		rs.SubnetMask = getSubnetMask(tq.CIDRbits)
+	}
+
+	if tq.Number > 1 {
+		if tq.Elapsed != 0 {
+			forward_elapsed := 0
+
+			if q, err := repo.GetQuestion(tq.Id, tq.Number-1); err == nil {
+				forward_elapsed = q.Elapsed
+			}
+
+			rs.AnswerdTime = tq.Elapsed - forward_elapsed
+		}
+
+	} else if tq.Number == 1 {
+		rs.AnswerdTime = tq.Elapsed
+	}
+
+	return models.ResultCollection{
+		Id:     tq.Id,
+		IsEnd:  false,
+		Result: []models.ResultSet{rs},
+	}
 }
 
 // summary => JSONとして返却するための構造体へデータを詰め替えます
@@ -357,17 +550,3 @@ func getParsedTime(strTime string) time.Time {
 func getNowString() string {
 	return time.Now().Format(DATETIME_FORMAT)
 }
-
-// summary => 渡された各オクテットごとの数字をIPアドレスへと結合します
-/////////////////////////////////////////
-func concatIPAddress(a, b, c, d string) string {
-	strIP := fmt.Sprintf("%s.%s.%s.%s", a, b, c, d)
-	ip := net.ParseIP(strIP)
-
-	if ip == nil {
-		return "0.0.0.0"
-	} else {
-		return strIP
-	}
-}
-
