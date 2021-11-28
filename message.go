@@ -50,4 +50,19 @@ var (
 		Code   : "E121",
 		Message: "既に回答済みの問題を更新することはできません",
 	}
+
+	errInvalidCookie = ErrorMessage{
+		Code   : "E200",
+		Message: "Cookieが無効になっているか存在しません",
+	}
+
+	errRequestedCookieIsNotExist = ErrorMessage{
+		Code   : "E201",
+		Message: "Cookieに保存されていたIDは既に存在しません",
+	}
+
+	errInvalidRequestedCookie = ErrorMessage{
+		Code   : "E202",
+		Message: "Cookieに保存されていたIDは無効なIDです",
+	}
 )

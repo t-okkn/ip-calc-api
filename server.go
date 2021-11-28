@@ -35,7 +35,7 @@ func SetupRouter() *gin.Engine {
 
 	v1.GET("/init/:total", initializeAction)
 	v1.POST("/next/:id/:number", getNextQuestion)
-	//v1.GET("/resume/:id", resumeAnswer)
+	v1.GET("/resume/:id", resumeAnswer)
 	//v1.DELETE("clean", deleteExpiredData)
 	v1.PUT("/:id/:number", updateQuestion)
 	v1.GET("/:id", getRegisteredQuestion)
@@ -43,7 +43,7 @@ func SetupRouter() *gin.Engine {
 
 	repo = initDB()
 
-	 return router
+	return router
 }
 
 // summary => 最初から始める場合の処理
@@ -181,25 +181,81 @@ func getNextQuestion(c *gin.Context) {
 	}
 }
 
-/*
 // summary => 続きから始める場合の処理
 // param::c => [p] gin.Context構造体
 /////////////////////////////////////////
 func resumeAnswer(c *gin.Context) {
-	_, err := c.Cookie(COOKIE_NAME)
+	id, err := c.Cookie(COOKIE_NAME)
 	if err == nil {
 		c.SetCookie(COOKIE_NAME, "", -1, "/", "", false, true)
+
+		c.JSON(http.StatusBadRequest, errInvalidCookie)
+		c.Abort()
+		return
 	}
 
-	m, err := repo.GetExpired(id)
+	if repo == nil {
+		c.JSON(http.StatusServiceUnavailable, errCannotConnectDB)
+		c.Abort()
+		return
+	}
+
+	tid, err := repo.GetID(id)
+
+	if err != nil {
+		c.SetCookie(COOKIE_NAME, "", -1, "/", "", false, true)
+
+		c.JSON(http.StatusBadRequest, errRequestedCookieIsNotExist)
+		c.Abort()
+		return
+	}
+
+	if tid.IsEnd == 1 || getParsedTime(tid.Expire).Before(time.Now()) {
+		c.SetCookie(COOKIE_NAME, "", -1, "/", "", false, true)
+
+		c.JSON(http.StatusBadRequest, errInvalidRequestedCookie)
+		c.Abort()
+		return
+	}
+
+	tid.Expire = time.Now().AddDate(0, 0, 1).Format(DATETIME_FORMAT)
+
+	if err := repo.UpdateID(tid); err != nil {
+		c.JSON(http.StatusServiceUnavailable, errFailedOperateData)
+		c.Abort()
+		return
+	}
+
+	qnum, err := repo.CheckNow(id)
+
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, errFailedGetData)
 		c.Abort()
 		return
 	}
+
+	tq, err := repo.GetQuestion(id, qnum.Now)
+
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errFailedGetData)
+		c.Abort()
+		return
+	}
+
+	c.SetCookie(COOKIE_NAME, id, 86400, "/", "", false, true)
+
+	c.JSON(http.StatusOK, getResumeSet(tq))
 }
 
+/*
 func deleteExpiredData(c *gin.Context) {
+	expiered, err := repo.GetExpired()
+
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errFailedGetData)
+		c.Abort()
+		return
+	}
 }
 */
 
@@ -502,6 +558,26 @@ func getQuestionSet(tq models.TranQuestion) models.QuestionSet {
 	}
 
 	return qs
+}
+
+// summary => JSONとして返却するための構造体へデータを詰め替えます
+/////////////////////////////////////////
+func getResumeSet(tq models.TranQuestion) models.ResumeSet {
+	rs := models.ResumeSet{
+		Id        : tq.Id,
+		Number    : tq.Number,
+		Source    : tq.Source,
+		CIDRbits  : tq.CIDRbits,
+		SubnetMask: "",
+		Elapsed   : tq.Elapsed,
+	}
+
+	if tq.IsCIDR == 1 {
+		rs.CIDRbits   = -1
+		rs.SubnetMask = getSubnetMask(tq.CIDRbits)
+	}
+
+	return rs
 }
 
 // summary => JSONとして返却するための構造体へデータを詰め替えます

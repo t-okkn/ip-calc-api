@@ -8,6 +8,15 @@ type QuestionSet struct {
 	SubnetMask string `json:"subnet_mask"`
 }
 
+type ResumeSet struct {
+	Id         string `json:"id"`
+	Number     int    `json:"number"`
+	Source     string `json:"source"`
+	CIDRbits   int    `json:"cidr_bits"`
+	SubnetMask string `json:"subnet_mask"`
+	Elapsed    int    `json:"elapsed"`
+}
+
 type AnswerSet struct {
 	NwAddr1st  string `form:"nwaddr_1st"`
 	NwAddr2nd  string `form:"nwaddr_2nd"`
@@ -47,8 +56,8 @@ type SummarySet struct {
 }
 
 type SummaryCollection struct {
-	Id     string      `json:"id"`
-	IsEnd  bool        `json:"is_end"`
+	Id      string      `json:"id"`
+	IsEnd   bool        `json:"is_end"`
 	Summary []SummarySet `json:"summary"`
 }
 
