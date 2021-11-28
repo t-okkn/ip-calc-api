@@ -11,7 +11,7 @@ import (
 
 const V4BITS int = net.IPv4len * 8
 
-var BitsList = [27]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+var bitsList = [27]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                        18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ,29, 30}
 
 
@@ -58,7 +58,7 @@ func getQuestion() (uint32, int) {
 			start = rnd.Intn(21)
 	}
 
-	bits := BitsList[start:][rnd.Intn(27-start)]
+	bits := bitsList[start:][rnd.Intn(27-start)]
 
 	return ipint, bits
 }
