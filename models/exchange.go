@@ -5,7 +5,6 @@ type QuestionSet struct {
 	Number     int    `json:"number"`
 	Source     string `json:"source"`
 	CIDRbits   int    `json:"cidr_bits"`
-	IsCIDR     int    `json:"is_cidr"`
 	SubnetMask string `json:"subnet_mask"`
 }
 
@@ -21,3 +20,20 @@ type AnswerSet struct {
 	Elapsed    string `form:"elapsed"`
 }
 
+type ResultSet struct {
+	Number      int    `json:"number"`
+	Source      string `json:"source"`
+	CIDRbits    int    `json:"cidr_bits"`
+	SubnetMask  string `json:"subnet_mask"`
+	CorNwAddr   string `json:"correct_nw"`
+	AnsNwAddr   string `json:"answer_nw"`
+	CorBcAddr   string `json:"correct_bc"`
+	AnsBcAddr   string `json:"answer_bc"`
+	AnswerdTime int    `json:"answered_sec"`
+}
+
+type ResultCollection struct {
+	Id     string      `json:"id"`
+	IsEnd  bool        `json:"is_end"`
+	Result []ResultSet `json:"result"`
+}
