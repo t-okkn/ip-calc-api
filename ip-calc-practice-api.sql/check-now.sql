@@ -1,7 +1,7 @@
 SELECT
   COUNT(`tq`.`id`) AS `now`,
-  `mid`.`total`
+  `tid`.`total`
 FROM T_QUESTION AS `tq`
-LEFT JOIN M_ID AS `mid`
-  ON `tq`.`id` = `mid`.`id`
+LEFT JOIN T_ID AS `tid`
+  ON `tq`.`id` = `tid`.`id`
 WHERE `tq`.`id` = :id;

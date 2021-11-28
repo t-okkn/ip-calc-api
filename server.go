@@ -56,9 +56,10 @@ func initializeAction(c *gin.Context) {
 	id := getID()
 	tq := generateNewQuestion(id, 1)
 
-	mid := models.MstrID{
+	tid := models.TranID{
 		Id:     id,
 		Total:  total,
+		IsEnd:  0,
 		Expire: time.Now().AddDate(0, 0, 1).Format(DATETIME_FORMAT),
 	}
 
@@ -68,7 +69,7 @@ func initializeAction(c *gin.Context) {
 		return
 	}
 
-	if err := repo.InsertFirstData(mid, tq); err != nil {
+	if err := repo.InsertFirstData(tid, tq); err != nil {
 		c.JSON(http.StatusServiceUnavailable, errFailedOperateData)
 		c.Abort()
 		return

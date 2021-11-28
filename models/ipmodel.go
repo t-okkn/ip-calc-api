@@ -4,9 +4,10 @@ import (
 	"github.com/go-gorp/gorp"
 )
 
-type MstrID struct {
+type TranID struct {
 	Id     string `db:"id, primarykey" json:"id"`
 	Total  int    `db:"total" json:"total"`
+	IsEnd  int    `db:"is_end" json:"is_end"`
 	Expire string `db:"expire" json:"expire"`
 }
 
@@ -32,7 +33,7 @@ type NowNumber struct {
 
 // MapStructsToTables 構造体と物理テーブルの紐付け
 func MapStructsToTables(dbmap *gorp.DbMap) {
-	dbmap.AddTableWithName(MstrID{}, "M_ID").SetKeys(false, "Id")
+	dbmap.AddTableWithName(TranID{}, "T_ID").SetKeys(false, "Id")
 	dbmap.AddTableWithName(TranQuestion{}, "T_QUESTION").SetKeys(false, "Id", "Number")
 }
 

@@ -15,24 +15,24 @@ func NewIpRepository(dm *gorp.DbMap) *IpRepository {
 	return &IpRepository{dm}
 }
 
-func (r *IpRepository) GetID(id string) (models.MstrID, error) {
-	var result models.MstrID
+func (r *IpRepository) GetID(id string) (models.TranID, error) {
+	var result models.TranID
 	query := GetSQL("get-id", "")
 	val := map[string]interface{}{"id": id}
 
 	if err := r.SelectOne(&result, query, val); err != nil {
-		return models.MstrID{}, err
+		return models.TranID{}, err
 	}
 
 	return result, nil
 }
 
-func (r *IpRepository) GetExpired() ([]models.MstrID, error) {
-	var result []models.MstrID
+func (r *IpRepository) GetExpired() ([]models.TranID, error) {
+	var result []models.TranID
 	query := GetSQL("get-expired", "")
 
 	if _, err := r.Select(&result, query); err != nil {
-		return []models.MstrID{}, err
+		return []models.TranID{}, err
 	}
 
 	return result, nil
@@ -74,7 +74,7 @@ func (r *IpRepository) CheckNow(id string) (models.NowNumber, error) {
 	return result, nil
 }
 
-func (r *IpRepository) InsertFirstData(mid models.MstrID, tq models.TranQuestion) error {
+func (r *IpRepository) InsertFirstData(mid models.TranID, tq models.TranQuestion) error {
 	tx, err := r.Begin()
 
 	if err != nil {
@@ -139,7 +139,7 @@ func (r *IpRepository) UpdateQuestion(tq models.TranQuestion) error {
 	return nil
 }
 
-func (r *IpRepository) DeleteExpiredData(ids []models.MstrID) error {
+func (r *IpRepository) DeleteExpiredData(ids []models.TranID) error {
 	str_ids := make([]string, len(ids), len(ids))
 	for i, v := range ids {
 		str_ids[i] = v.Id
