@@ -150,18 +150,34 @@ func getNextQuestion(c *gin.Context) {
 		c.JSON(http.StatusOK, getQuestionSet(newq))
 
 	} else {
-		results, err := repo.GetResults(id_prm)
+		tid, err := repo.GetID(id_prm)
 
 		if err != nil {
-			c.JSON(http.StatusServiceUnavailable, errFailedGetData)
+			c.JSON(http.StatusBadRequest, errFailedGetData)
 			c.Abort()
 			return
 		}
 
-		rc := getSummaryCollection(results)
-		rc.IsEnd = true
+		tid.IsEnd = 1
 
-		c.JSON(http.StatusOK, rc)
+		if err := repo.UpdateID(tid); err != nil {
+			c.JSON(http.StatusServiceUnavailable, errFailedOperateData)
+			c.Abort()
+			return
+		}
+
+		results, err := repo.GetResults(id_prm)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, errFailedGetData)
+			c.Abort()
+			return
+		}
+
+		sc := getSummaryCollection(tid, results)
+		sc.IsEnd = true
+
+		c.JSON(http.StatusOK, sc)
 	}
 }
 
@@ -254,9 +270,18 @@ func updateQuestion(c *gin.Context) {
 func getRegisteredQuestion(c *gin.Context) {
 	id_prm  := c.Param("id")
 	num_prm := c.Param("number")
+	secret  := c.DefaultQuery("secret", "")
 
 	if repo == nil {
 		c.JSON(http.StatusServiceUnavailable, errCannotConnectDB)
+		c.Abort()
+		return
+	}
+
+	tid, err := repo.GetID(id_prm)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errFailedGetData)
 		c.Abort()
 		return
 	}
@@ -292,7 +317,16 @@ func getRegisteredQuestion(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, getOneSummary(tq))
+		switch secret {
+		case "raw":
+			c.JSON(http.StatusOK, getOneRawData(tid, tq))
+
+		case "summary":
+			c.JSON(http.StatusOK, getOneSummary(tid, tq))
+
+		default:
+			c.JSON(http.StatusOK, getOneResult(tq))
+		}
 
 	} else {
 		results, err := repo.GetResults(id_prm)
@@ -303,7 +337,16 @@ func getRegisteredQuestion(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, getSummaryCollection(results))
+		switch secret {
+		case "raw":
+			c.JSON(http.StatusOK, getRawData(tid, results))
+
+		case "summary":
+			c.JSON(http.StatusOK, getSummaryCollection(tid, results))
+
+		default:
+			c.JSON(http.StatusOK, getResultCollection(results))
+		}
 	}
 }
 
@@ -449,7 +492,25 @@ func getQuestionSet(tq models.TranQuestion) models.QuestionSet {
 
 // summary => JSONとして返却するための構造体へデータを詰め替えます
 /////////////////////////////////////////
-func getOneSummary(tq models.TranQuestion) models.SummaryCollection {
+func getOneRawData(tid models.TranID, tq models.TranQuestion) models.RawData {
+	return models.RawData{
+		Id      : tid,
+		Question: []models.TranQuestion{tq},
+	}
+}
+
+// summary => JSONとして返却するための構造体へデータを詰め替えます
+/////////////////////////////////////////
+func getRawData(tid models.TranID, tqList []models.TranQuestion) models.RawData {
+	return models.RawData{
+		Id      : tid,
+		Question: tqList,
+	}
+}
+
+// summary => JSONとして返却するための構造体へデータを詰め替えます
+/////////////////////////////////////////
+func getOneSummary(tid models.TranID, tq models.TranQuestion) models.SummaryCollection {
 	ss := models.SummarySet{
 		Number     : tq.Number,
 		Source     : tq.Source,
@@ -475,7 +536,9 @@ func getOneSummary(tq models.TranQuestion) models.SummaryCollection {
 				forward_elapsed = q.Elapsed
 			}
 
-			ss.AnswerdTime = tq.Elapsed - forward_elapsed
+			if tq.Elapsed - forward_elapsed >= 0 {
+				ss.AnswerdTime = tq.Elapsed - forward_elapsed
+			}
 		}
 
 	} else if tq.Number == 1 {
@@ -483,19 +546,23 @@ func getOneSummary(tq models.TranQuestion) models.SummaryCollection {
 	}
 
 	return models.SummaryCollection{
-		Id:     tq.Id,
-		IsEnd:  false,
+		Id     : tq.Id,
+		IsEnd  : tid.IsEnd == 1,
 		Summary: []models.SummarySet{ss},
 	}
 }
 
 // summary => JSONとして返却するための構造体へデータを詰め替えます
 /////////////////////////////////////////
-func getSummaryCollection(tqList []models.TranQuestion) models.SummaryCollection {
+func getSummaryCollection(
+	tid models.TranID,
+	tqList []models.TranQuestion,
+) models.SummaryCollection {
+
 	s   := make([]models.SummarySet, len(tqList))
 	res := models.SummaryCollection{
-		Id:     "",
-		IsEnd:  false,
+		Id     : "",
+		IsEnd  : tid.IsEnd == 1,
 		Summary: s,
 	}
 
@@ -523,11 +590,70 @@ func getSummaryCollection(tqList []models.TranQuestion) models.SummaryCollection
 
 		} else {
 			if tq.Elapsed != 0 {
-				ss.AnswerdTime = tq.Elapsed - tqList[i-1].Elapsed
+				if tq.Elapsed - tqList[i-1].Elapsed >= 0 {
+					ss.AnswerdTime = tq.Elapsed - tqList[i-1].Elapsed
+				}
 			}
 		}
 
 		res.Summary[i] = ss
+	}
+
+	return res
+}
+
+// summary => JSONとして返却するための構造体へデータを詰め替えます
+/////////////////////////////////////////
+func getOneResult(tq models.TranQuestion) models.ResultCollection {
+	rs := models.ResultSet{
+		Number     : tq.Number,
+		Source     : tq.Source,
+		CIDRbits   : tq.CIDRbits,
+		SubnetMask : "",
+		AnsNwAddr  : tq.AnsNwAddr,
+		AnsBcAddr  : tq.AnsBcAddr,
+	}
+
+	if tq.IsCIDR == 1 {
+		rs.CIDRbits   = -1
+		rs.SubnetMask = getSubnetMask(tq.CIDRbits)
+	}
+
+	return models.ResultCollection{
+		Id    : tq.Id,
+		Result: []models.ResultSet{rs},
+	}
+}
+
+// summary => JSONとして返却するための構造体へデータを詰め替えます
+/////////////////////////////////////////
+func getResultCollection(tqList []models.TranQuestion) models.ResultCollection {
+	r   := make([]models.ResultSet, len(tqList))
+	res := models.ResultCollection{
+		Id    : "",
+		Result: r,
+	}
+
+	for i, tq := range tqList {
+		if i == 0 {
+			res.Id = tq.Id
+		}
+
+		rs := models.ResultSet{
+			Number     : tq.Number,
+			Source     : tq.Source,
+			CIDRbits   : tq.CIDRbits,
+			SubnetMask : "",
+			AnsNwAddr  : tq.AnsNwAddr,
+			AnsBcAddr  : tq.AnsBcAddr,
+		}
+
+		if tq.IsCIDR == 1 {
+			rs.CIDRbits   = -1
+			rs.SubnetMask = getSubnetMask(tq.CIDRbits)
+		}
+
+		res.Result[i] = rs
 	}
 
 	return res

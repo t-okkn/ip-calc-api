@@ -51,3 +51,8 @@ type SummaryCollection struct {
 	IsEnd  bool        `json:"is_end"`
 	Summary []SummarySet `json:"summary"`
 }
+
+type RawData struct {
+	Id       TranID         `json:"id_data"`
+	Question []TranQuestion `json:"question_data"`
+}
