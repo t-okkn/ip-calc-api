@@ -186,7 +186,8 @@ func getNextQuestion(c *gin.Context) {
 /////////////////////////////////////////
 func resumeAnswer(c *gin.Context) {
 	id, err := c.Cookie(COOKIE_NAME)
-	if err == nil {
+
+	if err != nil {
 		c.SetCookie(COOKIE_NAME, "", -1, "/", "", false, true)
 
 		c.JSON(http.StatusBadRequest, errInvalidCookie)
