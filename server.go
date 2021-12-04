@@ -35,11 +35,11 @@ func SetupRouter() *gin.Engine {
 
 	v1.GET("/init/:total", initializeAction)
 	v1.POST("/next/:id/:number", getNextQuestion)
-	v1.GET("/resume/:id", resumeAnswer)
+	v1.GET("/resume", resumeAnswer)
 	v1.PUT("/:id/:number", updateQuestion)
 	v1.GET("/:id", getRegisteredQuestion)
 	v1.GET("/:id/:number", getRegisteredQuestion)
-	v1.DELETE("clean", deleteExpiredData)
+	v1.DELETE("/clean", deleteExpiredData)
 
 	repo = initDB()
 
