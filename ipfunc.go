@@ -63,10 +63,6 @@ func getQuestion() (uint32, int) {
 	return ipint, bits
 }
 
-func ip2uint(ip net.IP) uint32 {
-	return binary.BigEndian.Uint32([]byte(ip.To4()))
-}
-
 func uint2ip(ip uint32) net.IP {
 	b := make([]byte, 4)
 	binary.BigEndian.PutUint32(b, ip)
@@ -107,3 +103,8 @@ func getCIDRMask(bits int) net.IPMask {
 	}
 }
 
+/*
+func ip2uint(ip net.IP) uint32 {
+	return binary.BigEndian.Uint32([]byte(ip.To4()))
+}
+*/
