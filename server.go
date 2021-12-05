@@ -31,7 +31,7 @@ var repo *db.IpRepository
 /////////////////////////////////////////
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
-	v1 := router.Group("api/v1")
+	v1 := router.Group("v1")
 
 	v1.GET("/init/:total", initializeAction)
 	v1.POST("/next/:id/:number", getNextQuestion)
