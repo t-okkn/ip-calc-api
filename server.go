@@ -33,6 +33,7 @@ func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	v1 := router.Group("v1")
 
+	v1.GET("/hasCookie", checkCookieStatus)
 	v1.GET("/init/:total", initializeAction)
 	v1.POST("/next/:id/:number", getNextQuestion)
 	v1.GET("/resume", resumeAnswer)
@@ -44,6 +45,19 @@ func SetupRouter() *gin.Engine {
 	repo = initDB()
 
 	return router
+}
+
+// summary => Cookieの確認処理
+// param::c => [p] gin.Context構造体
+/////////////////////////////////////////
+func checkCookieStatus(c *gin.Context) {
+	_, err := c.Cookie(COOKIE_NAME)
+
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+	} else {
+		c.Status(http.StatusOK)
+	}
 }
 
 // summary => 最初から始める場合の処理
@@ -176,6 +190,8 @@ func getNextQuestion(c *gin.Context) {
 
 		sc := getSummaryCollection(tid, results)
 		sc.IsEnd = true
+
+		c.SetCookie(COOKIE_NAME, "", -1, "/", "", false, true)
 
 		c.JSON(http.StatusOK, sc)
 	}
