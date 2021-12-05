@@ -2,7 +2,7 @@ package models
 
 type QuestionSet struct {
 	Id         string `json:"id"`
-	Number     int    `json:"number"`
+	Number     int    `json:"q_number"`
 	Source     string `json:"source"`
 	CIDRbits   int    `json:"cidr_bits"`
 	SubnetMask string `json:"subnet_mask"`
@@ -10,7 +10,7 @@ type QuestionSet struct {
 
 type ResumeSet struct {
 	Id         string `json:"id"`
-	Number     int    `json:"number"`
+	Number     int    `json:"q_number"`
 	Source     string `json:"source"`
 	CIDRbits   int    `json:"cidr_bits"`
 	SubnetMask string `json:"subnet_mask"`
@@ -30,7 +30,7 @@ type AnswerSet struct {
 }
 
 type ResultSet struct {
-	Number      int    `json:"number"`
+	Number      int    `json:"q_number"`
 	Source      string `json:"source"`
 	CIDRbits    int    `json:"cidr_bits"`
 	SubnetMask  string `json:"subnet_mask"`
@@ -44,7 +44,7 @@ type ResultCollection struct {
 }
 
 type SummarySet struct {
-	Number      int    `json:"number"`
+	Number      int    `json:"q_number"`
 	Source      string `json:"source"`
 	CIDRbits    int    `json:"cidr_bits"`
 	SubnetMask  string `json:"subnet_mask"`

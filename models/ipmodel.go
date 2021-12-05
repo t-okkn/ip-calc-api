@@ -13,7 +13,7 @@ type TranID struct {
 
 type TranQuestion struct {
 	Id        string `db:"id, primarykey" json:"id"`
-	Number    int    `db:"question_number, primarykey" json:"number"`
+	Number    int    `db:"question_number, primarykey" json:"q_number"`
 	Source    string `db:"source" json:"source"`
 	CIDRbits  int    `db:"cidr_bits" json:"cidr_bits"`
 	IsCIDR    int    `db:"is_cidr" json:"is_cidr"`
