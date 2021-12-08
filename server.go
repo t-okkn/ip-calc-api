@@ -138,7 +138,7 @@ func getNextQuestion(c *gin.Context) {
 
 	var req models.AnswerSet
 
-	if err := c.Bind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errInvalidRequestedData)
 		c.Abort()
 		return
@@ -334,7 +334,7 @@ func updateQuestion(c *gin.Context) {
 
 	var req models.AnswerSet
 
-	if err := c.Bind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errInvalidRequestedData)
 		c.Abort()
 		return

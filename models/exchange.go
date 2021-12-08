@@ -18,15 +18,15 @@ type ResumeSet struct {
 }
 
 type AnswerSet struct {
-	NwAddr1st  string `form:"nwaddr_1st"`
-	NwAddr2nd  string `form:"nwaddr_2nd"`
-	NwAddr3rd  string `form:"nwaddr_3rd"`
-	NwAddr4th  string `form:"nwaddr_4th"`
-	BcAddr1st  string `form:"bcaddr_1st"`
-	BcAddr2nd  string `form:"bcaddr_2nd"`
-	BcAddr3rd  string `form:"bcaddr_3rd"`
-	BcAddr4th  string `form:"bcaddr_4th"`
-	Elapsed    string `form:"elapsed"`
+	NwAddr1st  string `json:"nwaddr_1st"`
+	NwAddr2nd  string `json:"nwaddr_2nd"`
+	NwAddr3rd  string `json:"nwaddr_3rd"`
+	NwAddr4th  string `json:"nwaddr_4th"`
+	BcAddr1st  string `json:"bcaddr_1st"`
+	BcAddr2nd  string `json:"bcaddr_2nd"`
+	BcAddr3rd  string `json:"bcaddr_3rd"`
+	BcAddr4th  string `json:"bcaddr_4th"`
+	Elapsed    string `json:"elapsed"`
 }
 
 type ResultSet struct {
