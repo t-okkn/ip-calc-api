@@ -259,6 +259,18 @@ func resumeAnswer(c *gin.Context) {
 		return
 	}
 
+	if qnum.Now > 1 {
+		old_tq, err := repo.GetQuestion(id, qnum.Now-1)
+
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, errFailedGetData)
+			c.Abort()
+			return
+		}
+
+		tq.Elapsed = old_tq.Elapsed
+	}
+
 	c.SetCookie(COOKIE_NAME, id, 86400, "/", "", false, true)
 
 	c.JSON(http.StatusOK, getResumeSet(tq))
