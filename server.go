@@ -555,11 +555,9 @@ func readyForUpdateQuestion(as models.AnswerSet, tq *models.TranQuestion) {
 		bcaddr = str_bcaddr
 	}
 
-	elapsed, _ := strconv.Atoi(as.Elapsed)
-
 	tq.AnsNwAddr = nwaddr
 	tq.AnsBcAddr = bcaddr
-	tq.Elapsed   = elapsed
+	tq.Elapsed   = as.Elapsed
 	tq.Updated   = getNowString()
 }
 

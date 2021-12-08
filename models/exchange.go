@@ -26,7 +26,7 @@ type AnswerSet struct {
 	BcAddr2nd  string `json:"bcaddr_2nd"`
 	BcAddr3rd  string `json:"bcaddr_3rd"`
 	BcAddr4th  string `json:"bcaddr_4th"`
-	Elapsed    string `json:"elapsed"`
+	Elapsed    int    `json:"elapsed"`
 }
 
 type ResultSet struct {
