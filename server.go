@@ -13,8 +13,8 @@ import (
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql"
 
-	"ip-calc-practice-api/db"
-	"ip-calc-practice-api/models"
+	"ip-calc-api/db"
+	"ip-calc-api/models"
 )
 
 const (

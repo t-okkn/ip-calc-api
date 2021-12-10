@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/go-gorp/gorp"
-	"ip-calc-practice-api/models"
+	"ip-calc-api/models"
 )
 
 type IpRepository struct {

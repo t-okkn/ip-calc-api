@@ -1,4 +1,4 @@
-NAME     := ip-calc-practice-api
+NAME     := ip-calc-api
 VERSION  := v0.1.0
 REVISION := $(shell git rev-parse --short HEAD)
 
