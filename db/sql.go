@@ -82,7 +82,7 @@ func GetSQL(name string, req interface{}) string {
 	}
 
 	var buf bytes.Buffer
-	filename := fmt.Sprintf("%s/%s.sql", dir, name)
+	filename := filepath.Join(dir, fmt.Sprintf("%s.sql", name))
 
 	t := template.Must(template.ParseFiles(filename))
 	t.Execute(&buf, req)
