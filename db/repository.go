@@ -180,7 +180,7 @@ func (r *IpRepository) DeleteExpiredData(ids []models.TranID) error {
 		return err
 	}
 
-	if result == nil || len(result) == 0 {
+	if len(result) == 0 {
 		if err := tx.Commit(); err != nil {
 			tx.Rollback()
 			return err
